@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BLAST Search{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>BLAST Search against Database Entries</h1>
+  <body>
+    <p>BLAST finds regions of similarity between biological sequences. The program compares nucleotide sequences.</p>
+  </body>
+</div>
+{{ wtf.quick_form(form) }}
+{% endblock %}
