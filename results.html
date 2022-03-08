@@ -12,6 +12,7 @@
   <body>
     <h1>Search Results</h1>
     <p>Here are the database hits based on the information you have entered!</p>
+    <a href="http://127.0.0.1:5000/help">Testing!</a>
 </div>
 </head>
 <div class="container">
@@ -27,7 +28,6 @@ name4= {{name4}}
 <p>
 
 <h2>List of Entries</h2>
-
 <div class="table-responsive">
   <table class="table">
     <thead class="thead-dark">
@@ -41,7 +41,7 @@ name4= {{name4}}
     <tbody>
        {% for item in presults %}
            <tr>
-             <td>{{item.id}}</td>
+             <td><a href="{{ url_for('gene', id=item.id) }}">{{item.id}}</a></td>
              <td>{{item.host}}</td>
              <td>{{item.strain}}</td>
              <td>{{item.description}}</td>

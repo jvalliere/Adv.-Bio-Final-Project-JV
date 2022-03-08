@@ -94,7 +94,7 @@ class Data(db.Model):
         self.host = host
         self.description = description
         self.ncbi_nucleotide = ncbi_nucleotide
-        self.locu_tag = locus_tag
+        self.locus_tag = locus_tag
         self.ncbi_protein = ncbi_protein
         self.aa_sequence = aa_sequence
 
@@ -133,6 +133,11 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
+
+@app.route('/gene/<id>')
+def gene(id):
+    entry = Data.query.filter_by(id=id).first_or_404()
+    return render_template('gene.html', entry=entry)
 
 @app.route("/results", methods = ['GET', 'POST'])
 def presults():
