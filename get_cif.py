@@ -112,11 +112,15 @@ class Data(db.Model):
 ###########################################################################################################################
 @app.route("/", methods =['GET','POST'])
 def index():
-    form2 = SearchButton_Form()
-    if request.method == 'POST':
-        return redirect('/search')
-
-    return render_template("index.html", form2=form2)
+    if request.method == 'GET':
+        return render_template("index.html")
+    elif request.method == 'POST':
+        if request.form['action'] == 'Go to Search':
+            return redirect('/search')
+        elif request.form['action'] == 'Go to BLAST':
+            return redirect('/blast')
+  
+    return render_template("index.html")
 
 ###########################################################################################################################
 @app.route('/about')
