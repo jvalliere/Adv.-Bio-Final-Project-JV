@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Browse Results{% endblock %}
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>....</title>
+  <meta charset="utf-8">
+<div class="page-header">
+  <body>
+    <h1>Browse Results</h1>
+    <p>Here are the database hits based on the parameters you chose!</p>
+</div>
+</head>
+<div class="container">
+Search parameters entered:
+<p>
+parameter = {{parameter}}
+<p>
+limit results = {{limit}}
+<p>
+
+<h2>List of Entries</h2>
+<div class="table-responsive">
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th>gene ID</th>
+        <th>Host</th>
+        <th>Wolbachia Strain</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+       {% for item in browse_presults %}
+           <tr>
+             <td><a href="{{ url_for('gene', id=item.id) }}">{{item.id}}</a></td>
+             <td>{{item.host}}</td>
+             <td>{{item.strain}}</td>
+             <td>{{item.description}}</td>
+           </tr>
+        {% endfor %}
+   </tbody>
+  </table>
+</div>
+</div>
+</body>
+
+{{ wtf.quick_form(form3) }}
+{% endblock %}
+</html>

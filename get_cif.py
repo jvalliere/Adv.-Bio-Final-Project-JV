@@ -35,12 +35,14 @@ class BlastButton_Form(FlaskForm):
 ###########################################################################################################################
 class SearchButton_Form(FlaskForm):
     submit = SubmitField('Go To Search')
-
 ###########################################################################################################################
-class NameForm(FlaskForm):
+class BrowseButton_Form(FlaskForm):
+    submit = SubmitField('Go To Browse')
+###########################################################################################################################
+class SearchForm(FlaskForm):
     name2 = RadioField('Search by Wolbachia Strain, Arthropod Host, or entry ID:', choices=[('strain', 'Wolbachia Strain'), ('host', 'Arthropod Host'), ('id', 'Entry ID')])
     name1 = StringField('Enter an organism or ID:', validators=[DataRequired()])
-    name3 = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'),('50', '50')])
+    name3 = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
     name4 = SelectField('Order results by:', choices=[('strain', 
             'Wolbachia Strain'), ('host', 'Arthropod Host')])
     submit = SubmitField('Submit')
@@ -52,6 +54,12 @@ class BLASTForm(FlaskForm):
     submit = SubmitField('Submit')
 
 ###########################################################################################################################
+class BrowseForm(FlaskForm):
+    parameter = RadioField('Search by: ', choices=[('cifA', 'cifA (gene)'), ('cifB', 'cifB (gene)'), ('Type I', 'Type I (CIF type)'), ('Type II', 'Type II (CIF type)'), ('Type III', 'Type III (CIF type)'), ('Type IV', 'Type IV (CIF type)'), ('Type V', 'Type V (CIF type)')])
+    limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
+    submit = SubmitField('Submit')
+
+###########################################################################################################################    
 class Data(db.Model):
     __tablename__ = "cifgene"
     id = db.Column(db.String(10),
@@ -119,6 +127,8 @@ def index():
             return redirect('/search')
         elif request.form['action'] == 'Go to BLAST':
             return redirect('/blast')
+        else:
+            return redirect('/browse')            
   
     return render_template("index.html")
 
@@ -143,6 +153,7 @@ def blast():
     seq = None
     limit = None    
     form = BLASTForm()
+
     if form.validate_on_submit():
         if request.method == 'POST':
            session['seq']  = form.seq.data      # seq is search sequence entered in first text box on form
@@ -151,7 +162,7 @@ def blast():
 
         form.seq.data = ''    ## Reset form values
         form.limit.data = ''
-    return render_template('search.html', form=form)
+    return render_template('blast.html', form=form)
 
 ###########################################################################################################################
 @app.route('/blast_results', methods = ['GET', 'POST'])
@@ -159,7 +170,7 @@ def blast_presults():
 
     seq = session.get('seq')
     limit = session.get('limit')
-    form3 = SearchButton_Form()
+    form3 = BlastButton_Form()
 
     #open raw data csv, create fasta file from it
     df = pd.read_csv("Cif Database for Jesse.csv")
@@ -202,7 +213,6 @@ def blast_presults():
     return render_template('blast_results.html', blast_presults=blast_presults,\
     seq=seq,limit=limit, form3=form3)
 
-
 ###########################################################################################################################
 @app.errorhandler(404)
 def page_not_found(e):
@@ -218,6 +228,46 @@ def internal_server_error(e):
 def gene(id):
     entry = Data.query.filter_by(id=id).first_or_404()
     return render_template('gene.html', entry=entry)
+
+###########################################################################################################################
+@app.route('/browse', methods=['GET', 'POST'])
+def browse():
+
+    parameter = None
+    limit = None
+    form = BrowseForm()
+
+    if form.validate_on_submit():
+        if request.method == 'POST':
+            session['parameter'] = form.parameter.data
+            session['limit'] = form.limit.data
+
+            return redirect('/browse_results')
+
+        form.parameter.data = ''
+        form.limit.data = ''
+
+    return render_template('browse.html', form=form)
+
+###########################################################################################################################
+@app.route('/browse_results', methods=['GET', 'POST'])
+def browse_presults():
+
+    parameter = session.get('parameter')
+    limit = session.get('limit')
+    form3 = BrowseButton_Form()
+
+
+    if parameter == 'cifA' or parameter == 'cifB':
+        browse_presults = Data.query.filter(Data.gene.like(parameter)).limit(limit).all()
+    else:
+        browse_presults = Data.query.filter(Data.cif_type.like(parameter)).limit(limit).all()
+
+    if request.method == 'POST':
+        return redirect('/browse')
+
+    return render_template('browse_results.html', browse_presults=browse_presults,\
+    parameter=parameter,limit=limit,form3=form3)
 
 ###########################################################################################################################
 @app.route("/results", methods = ['GET', 'POST'])
@@ -242,7 +292,7 @@ def presults():
         return redirect('/search')
 
     return render_template('results.html', presults=presults,\
-     name1=name1,name2=name2,name3=name3,name4=name4,form3=form3)
+    name1=name1,name2=name2,name3=name3,name4=name4,form3=form3)
 
 ###########################################################################################################################
 @app.route('/search', methods=['GET', 'POST'])
@@ -251,17 +301,19 @@ def search():
     name2 = None
     name3 = None
     name4 = None
-    form = NameForm()
+    form = SearchForm()
+
+    print("IN THE SEARCH FUNCTION")
     if form.validate_on_submit():
         if request.method == 'POST':
-           session['name1']  = form.name1.data		# name1 is search term entered in first text box on form
-           session['name2']  = form.name2.data		# name2 is to specify first or last name in search query
-           session['name3']  = form.name3.data		# name3 is to limit the number of results displayed in table
-           session['name4']  = form.name4.data		# name4 is to specify the order of the search results
+           session['name1']  = form.name1.data      # name1 is search term entered in first text box on form
+           session['name2']  = form.name2.data      # name2 is to specify first or last name in search query
+           session['name3']  = form.name3.data      # name3 is to limit the number of results displayed in table
+           session['name4']  = form.name4.data      # name4 is to specify the order of the search results
 
            return redirect('/results')
 
-        form.name1.data = ''	## Reset form values
+        form.name1.data = ''    ## Reset form values
         form.name2.data = ''
         form.name3.data = ''
         form.name4.data = ''
@@ -269,4 +321,5 @@ def search():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
