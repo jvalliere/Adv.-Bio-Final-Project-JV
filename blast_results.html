@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Search Results{% endblock %}
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>....</title>
+  <meta charset="utf-8">
+<div class="page-header">
+  <body>
+    <h1>BLAST Results</h1>
+    <p>Here are the database hits based on the information you have BLASTed!</p>
+</div>
+</head>
+<div class="container">
+Value of form variables:
+<p>
+sequence = {{seq}}
+<p>
+limit results = {{limit}}
+<p>
+{{blast_presults}}
+<p>
+
+
+
+{{ wtf.quick_form(form3) }}
+{% endblock %}
+</html>	

@@ -14,6 +14,9 @@
 <div class="table-responsive">
   <table class="table">
     <thead class="thead-dark">
+	<caption>
+          <h3>{{entry.id}}</h3>
+     </caption>
       <tr>
       	<th>ID</th>
         <th>Gene</th>
@@ -42,7 +45,7 @@
              <td>{{entry.ncbi_nucleotide}}</td>
              <td>{{entry.locus_tag}}</td>
              <td>{{entry.ncbi_protein}}</td>
-             <td>{{entry.aa_sequence}}</td>
+             <td style="word-wrap: break-word;min-width: 160px;max-width: 400px;">{{entry.aa_sequence}}</td>
            </tr>
    </tbody>
   </table>
