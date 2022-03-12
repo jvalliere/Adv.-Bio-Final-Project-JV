@@ -5,6 +5,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 from datetime import datetime
+import pandas as pd
+import os
+from Bio.Blast.Applications import NcbiblastpCommandline
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thequickbrownfrog'
@@ -26,25 +29,29 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Soccer08@localhos
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 
-
+###########################################################################################################################
+class BlastButton_Form(FlaskForm):
+    submit = SubmitField('Go to BLAST')
+###########################################################################################################################
 class SearchButton_Form(FlaskForm):
     submit = SubmitField('Go To Search')
 
-
+###########################################################################################################################
 class NameForm(FlaskForm):
-    name2 = RadioField('Search by Wolbachia Strain or Arthropod Host:', choices=[('strain', 'Wolbachia Strain'), ('host', 'Arthropod Host')])
-    name1 = StringField('Enter an organism or strain:', validators=[DataRequired()])
+    name2 = RadioField('Search by Wolbachia Strain, Arthropod Host, or entry ID:', choices=[('strain', 'Wolbachia Strain'), ('host', 'Arthropod Host'), ('id', 'Entry ID')])
+    name1 = StringField('Enter an organism or ID:', validators=[DataRequired()])
     name3 = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'),('50', '50')])
     name4 = SelectField('Order results by:', choices=[('strain', 
             'Wolbachia Strain'), ('host', 'Arthropod Host')])
     submit = SubmitField('Submit')
 
-#class BLASTForm(FlaskForm):
-#    name1 = StringField("Enter a sequence:", validators=[DataRequired()])
-#    name3 = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'),('50', '50')])
-#    submit = SubmitField('Submit')
+###########################################################################################################################
+class BLASTForm(FlaskForm):
+    seq = StringField("Enter a sequence:", validators=[DataRequired()])
+    limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
+    submit = SubmitField('Submit')
 
-
+###########################################################################################################################
 class Data(db.Model):
     __tablename__ = "cifgene"
     id = db.Column(db.String(10),
@@ -102,43 +109,113 @@ class Data(db.Model):
     def __repr__(self):
         return f"<cifgene {self.host}>"
 
-
+###########################################################################################################################
 @app.route("/", methods =['GET','POST'])
 def index():
     form2 = SearchButton_Form()
     if request.method == 'POST':
         return redirect('/search')
+
     return render_template("index.html", form2=form2)
 
+###########################################################################################################################
 @app.route('/about')
 def about():
     return render_template('about.html')
 
+###########################################################################################################################
 @app.route('/ref')
 def ref():
     return render_template('ref.html')
 
+###########################################################################################################################
 @app.route('/help')
 def help():
     return render_template('help.html')
 
-@app.route('/blast')
+###########################################################################################################################
+@app.route('/blast', methods=['GET', 'POST'])
 def blast():
-    return render_template('blast.html')
+    seq = None
+    limit = None    
+    form = BLASTForm()
+    if form.validate_on_submit():
+        if request.method == 'POST':
+           session['seq']  = form.seq.data      # seq is search sequence entered in first text box on form
+           session['limit']  = form.limit.data      # limit is to limit the number of results displayed in table
+           return redirect('/blast_results')
 
+        form.seq.data = ''    ## Reset form values
+        form.limit.data = ''
+    return render_template('search.html', form=form)
+
+###########################################################################################################################
+@app.route('/blast_results', methods = ['GET', 'POST'])
+def blast_presults():
+
+    seq = session.get('seq')
+    limit = session.get('limit')
+    form3 = SearchButton_Form()
+
+    #open raw data csv, create fasta file from it
+    df = pd.read_csv("Cif Database for Jesse.csv")
+    list_of_id = df['ID'].to_list()
+    list_of_seq = df['aa_sequence'].to_list()
+    ofile = open("db_entries.fasta", "w")
+    for i in range(len(list_of_seq)):
+        ofile.write(">" + list_of_id[i] + "\n" +list_of_seq[i] + "\n")
+    ofile.close()
+
+    #use the created fasta file to make a database to search against
+    os.system("makeblastdb -in db_entries.fasta -dbtype prot")
+
+    #open query file, erase contents, and put in the query the user wants 
+    ofile = open("query.seq", "r+")
+    ofile.truncate(0)
+    ofile.write(seq)
+    ofile.close()
+
+    #open output file, erase any contents so that the commandline can write in results 
+    ofile = open("output.txt", "r+")
+    ofile.truncate(0)
+    ofile.close()
+
+
+    #run the blast, and put the results into output.txt
+    cline = NcbiblastpCommandline(query= "query.seq", db="db_entries.fasta",
+                              evalue=0.001, max_target_seqs = int(limit), ungapped=False, out = "output.txt", outfmt = 7)
+    os.system(str(cline))
+
+
+    #open output file, write contents of output file to blast_presults, and close
+    ofile = open("output.txt", "r")
+    blast_presults = ofile.read()
+    ofile.close()
+
+    if request.method == 'POST':
+        return redirect('/blast')
+
+    return render_template('blast_results.html', blast_presults=blast_presults,\
+    seq=seq,limit=limit, form3=form3)
+
+
+###########################################################################################################################
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
+###########################################################################################################################
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
 
+###########################################################################################################################
 @app.route('/gene/<id>')
 def gene(id):
     entry = Data.query.filter_by(id=id).first_or_404()
     return render_template('gene.html', entry=entry)
 
+###########################################################################################################################
 @app.route("/results", methods = ['GET', 'POST'])
 def presults():
     name1 = session.get('name1')
@@ -152,13 +229,10 @@ def presults():
 
     if name2 == 'host':
         presults = Data.query.filter(Data.host.like(searchterm)).order_by(displayorder).limit(name3).all()
-    else:  ##  if not host defaults to strain
+    elif name2 == 'strain':  ##  if not host, check strain
         presults = Data.query.filter(Data.strain.like(searchterm)).order_by(displayorder).limit(name3).all()
-
-    #presults = Data.query.all()
-    #presults = Data.query.order_by(Data.strain).all()
-    #presults = Data.query.filter(Data.arthropod_host == name1).order_by(Data.arthropod_host).all()
-    #presults = Data.query.filter_by(Data.arthropod_host.like(searchterm)).order_by(displayorder).all()
+    else:
+        presults = Data.query.filter(Data.id.like(searchterm)).order_by(displayorder).limit(name3).all()
 
     if request.method == 'POST':
         return redirect('/search')
@@ -166,7 +240,7 @@ def presults():
     return render_template('results.html', presults=presults,\
      name1=name1,name2=name2,name3=name3,name4=name4,form3=form3)
 
-
+###########################################################################################################################
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     name1 = None
@@ -180,8 +254,7 @@ def search():
            session['name2']  = form.name2.data		# name2 is to specify first or last name in search query
            session['name3']  = form.name3.data		# name3 is to limit the number of results displayed in table
            session['name4']  = form.name4.data		# name4 is to specify the order of the search results
-#          return '''<h1>The name1 value is: {}</h1>
-#                  <h1>The name2  value is: {}</h1>'''.format(name1, name2)
+
            return redirect('/results')
 
         form.name1.data = ''	## Reset form values
