@@ -198,13 +198,23 @@ def blast_presults():
 
     #run the blast, and put the results into output.txt
     cline = NcbiblastpCommandline(query= "query.seq", db="db_entries.fasta",
-                              evalue=0.001, max_target_seqs = int(limit), ungapped=False, out = "output.txt", outfmt = 7)
+                              evalue=0.001, max_target_seqs = int(limit), ungapped=False, out = "output.txt", outfmt = 6)
     os.system(str(cline))
 
 
     #open output file, write contents of output file to blast_presults, and close
     ofile = open("output.txt", "r")
-    blast_presults = ofile.read()
+    blast_presults = []
+
+    lines = ofile.readlines()
+
+    for line in lines:
+        temp = line.split()
+        temp.remove('Query_1')
+        #HARD CODED
+        temp[0] = '<a href=\"http://127.0.0.1:5000/gene/' + temp[0] + '\">' + temp[0] + '</a>'
+        blast_presults.append(temp)
+   
     ofile.close()
 
     if request.method == 'POST':
@@ -321,5 +331,3 @@ def search():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-

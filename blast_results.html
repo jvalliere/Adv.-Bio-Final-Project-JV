@@ -21,10 +21,35 @@ sequence = {{seq}}
 <p>
 limit results = {{limit}}
 <p>
-{{blast_presults}}
-<p>
 
-
+<div class="table-responsive">
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th>Gene ID</th>
+        <th>% Identity</th>
+        <th>Alignment Length</th>
+        <th>Mismatches</th>
+        <th>Gap Opens</th>
+        <th>Query Start</th>
+        <th>Query End</th>
+        <th>Sequence Start</th>
+        <th>Sequence End</th>
+        <th>E-value</th>
+        <th>Bit Score</th>
+      </tr>
+    </thead>
+    <tbody>
+       	{% for list in blast_presults %}
+       		<tr>
+       		{% for element in list %}
+           		<td>{{element|safe}}</td>
+       		{% endfor %}
+       		</tr>
+        {% endfor %}
+   </tbody>
+  </table>
+</div>
 
 {{ wtf.quick_form(form3) }}
 {% endblock %}
