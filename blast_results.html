@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}Search Results{% endblock %}
+{% block title %}Blast Results{% endblock %}
 {% block page_content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,15 +13,19 @@
   <body>
     <h1>BLAST Results</h1>
     <p>Here are the database hits based on the information you have BLASTed!</p>
+  </body>
 </div>
 </head>
+
+
+
 <div class="container">
-Value of form variables:
-<p>
-sequence = {{seq}}
-<p>
-limit results = {{limit}}
-<p>
+  <body style="word-wrap: break-word;">
+    <p>Value of form variables:</p>
+    <p>sequence = {{seq}}</p>
+    <p>limit results = {{limit}}</p>
+  </body>
+</div>
 
 <div class="table-responsive">
   <table class="table">
