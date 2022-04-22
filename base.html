@@ -48,6 +48,7 @@ li a:hover {
 
 </body>
 
+
 {% endblock %}
 
 {% block content1 %}
@@ -66,5 +67,12 @@ li a:hover {
 
 {% block scripts %}
 {{ super() }}
+
+<div class = "questions" style = "position:fixed;bottom:0;left:50%;margin-left:-125px;font-size:10px;">
+  <p>For any questions please email: 
+    <a href = "mailto: jvallier@ramapo.edu">jvallier@ramapo.edu</a>
+  </p>
+</div>
+
 {% endblock %}
 
