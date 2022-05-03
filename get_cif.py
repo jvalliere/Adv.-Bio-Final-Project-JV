@@ -5,9 +5,11 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 from datetime import datetime
+from datetime import date
 import pandas as pd
 import os
 from Bio.Blast.Applications import NcbiblastpCommandline
+from flask_heroku import Heroku
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thequickbrownfrog'
@@ -18,26 +20,24 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thequickbrownfrog'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
 
-##*****************************************##
-## Connect to your local postgres database ##
-##*****************************************##
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Soccer08@localhost/cifgene'
-
-
-
+heroku = Heroku(app)
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 
+
 ###########################################################################################################################
-class BlastButton_Form(FlaskForm):
-    submit = SubmitField('Go to BLAST')
+#class BlastButton_Form(FlaskForm):
+#    submit = SubmitField('Go to BLAST')
 ###########################################################################################################################
 class SearchButton_Form(FlaskForm):
     submit = SubmitField('Go To Search')
 ###########################################################################################################################
 class BrowseButton_Form(FlaskForm):
     submit = SubmitField('Go To Browse')
+###########################################################################################################################
+#class UploadButton_Form(FlaskForm):
+#    submit = SubmitField('Upload an Entry!')
 ###########################################################################################################################
 class SearchForm(FlaskForm):
     name2 = RadioField('Search by Wolbachia Strain, Arthropod Host, or entry ID:', choices=[('strain', 'Wolbachia Strain'), ('host', 'Arthropod Host'), ('id', 'Entry ID')])
@@ -48,10 +48,10 @@ class SearchForm(FlaskForm):
     submit = SubmitField('Submit')
 
 ###########################################################################################################################
-class BLASTForm(FlaskForm):
-    seq = StringField("Enter a sequence:", validators=[DataRequired()])
-    limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
-    submit = SubmitField('Submit')
+#class BLASTForm(FlaskForm):
+#    seq = StringField("Enter a sequence:", validators=[DataRequired()])
+#    limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
+#    submit = SubmitField('Submit')
 
 ###########################################################################################################################
 class BrowseForm(FlaskForm):
@@ -59,7 +59,20 @@ class BrowseForm(FlaskForm):
     limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
     submit = SubmitField('Submit')
 
-###########################################################################################################################    
+###########################################################################################################################  
+"""class UploadForm(FlaskForm):
+    u_gene = SelectField('Select Gene Type:', choices=[('cifA', 'CIF A'), ('cifB', 'CIF B')])
+    u_cif_type = SelectField('Select CIF Type:', choices=[('Type I', 'Type I'), ('Type II', 'Type II'), ('Type III', 'Type III'), ('Type IV', 'Type IV'), ('Type V', 'Type V')])
+    u_organism = StringField("Enter Organism:", validators=[DataRequired()])
+    u_strain = StringField("Enter Strain:", validators=[DataRequired()])
+    u_host = StringField("Enter Host:", validators=[DataRequired()])
+    u_ncbi_nucleotide = StringField("Enter NCBI Nucleotide ID if possible:")
+    u_ncbi_protein = StringField("Enter NCBI Protein ID if possible:")
+    u_locus_tag = StringField("Enter Locus Tag:", validators=[DataRequired()])
+    u_aa_sequence = StringField("Enter Amino Acid Sequence:", validators=[DataRequired()])
+    submit = SubmitField('Submit')
+"""
+###########################################################################################################################   
 class Data(db.Model):
     __tablename__ = "cifgene"
     id = db.Column(db.String(10),
@@ -125,10 +138,12 @@ def index():
     elif request.method == 'POST':
         if request.form['action'] == 'Go to Search':
             return redirect('/search')
-        elif request.form['action'] == 'Go to BLAST':
-            return redirect('/blast')
+        #elif request.form['action'] == 'Go to BLAST':
+        #    return redirect('/blast')
         else:
-            return redirect('/browse')            
+            return redirect('/browse')
+        #else:
+        #    return redirect('/upload')            
   
     return render_template("index.html")
 
@@ -148,6 +163,95 @@ def help():
     return render_template('help.html')
 
 ###########################################################################################################################
+"""@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+
+    u_gene = None
+    u_cif_type = None
+    u_organism = None
+    u_strain = None
+    u_host = None
+    u_ncbi_nucleotide = None
+    u_ncbi_protein = None
+    u_locus_tag = None
+    u_aa_sequence = None 
+    form = UploadForm()
+
+    if form.validate_on_submit():
+        if request.method == 'POST':
+           session['u_gene']  = form.u_gene.data     
+           session['u_cif_type']  = form.u_cif_type.data
+           session['u_organism']  = form.u_organism.data
+           session['u_strain']  = form.u_strain.data
+           session['u_host']  = form.u_host.data
+           session['u_ncbi_nucleotide']  = form.u_ncbi_nucleotide.data
+           session['u_ncbi_protein']  = form.u_ncbi_protein.data
+           session['u_locus_tag']  = form.u_locus_tag.data
+           session['u_aa_sequence']  = form.u_aa_sequence.data
+           return redirect('/upload_ty')
+
+        form.u_gene.data = ''    ## Reset form values
+        form.u_cif_type.data = ''
+        form.u_organism.data = ''
+        form.u_strain.data = ''
+        form.u_host.data = ''
+        form.u_ncbi_nucleotide.data = ''
+        form.u_ncbi_protein.data = ''
+        form.u_locus_tag.data = ''
+        form.u_aa_sequence.data = ''
+    return render_template('upload.html', form=form)
+
+###########################################################################################################################
+@app.route('/upload_ty')
+def upload_ty():
+    u_gene = session.get('u_gene')
+    u_cif_type = session.get('u_cif_type')
+    u_organism = session.get('u_organism')
+    u_strain = session.get('u_strain')
+    u_host = session.get('u_host')
+    u_ncbi_nucleotide = session.get('u_ncbi_nucleotide')
+    u_ncbi_protein = session.get('u_ncbi_protein')
+    u_locus_tag = session.get('u_locus_tag')
+    u_aa_sequence = session.get('u_aa_sequence')
+
+    u_description = (str(u_cif_type) + ' ' + str(u_gene) + '; ' + str(u_organism) + ' ' + str(u_strain) + ' of ' + str(u_host))
+
+    print(u_description)
+    u_product = ""
+
+    if str(u_gene) == "cifA":
+        u_product = "cytoplasmic incompatibility factor cifA"
+    else:
+        u_product = "cytoplasmic incompatibility factor cifB"
+
+    today = date.today()
+    c_date = today.strftime("%m/%d/%Y")
+
+    #changed
+    df = pd.read_excel('uploads.xlsx')    
+
+    df1 = pd.DataFrame({'Date':[c_date],
+    'ID':[''],
+    'gene':[u_gene],
+    'product':[u_product],
+    'cif_type':[u_cif_type],
+    'organism':[u_organism],
+    'strain':[u_strain],
+    'host':[u_host],
+    'description':[u_description],
+    'NCBI_nucleotide':[u_ncbi_nucleotide],
+    'locus_tag':[u_locus_tag],
+    'NCBI_protein':[u_ncbi_protein],
+    'aa_sequence':[u_aa_sequence]})
+
+    df = df.append(df1)
+
+    #changed
+    df.to_excel('uploads.xlsx', index=False)
+
+    return render_template('upload_ty.html')
+
+###########################################################################################################################    
 @app.route('/blast', methods=['GET', 'POST'])
 def blast():
     seq = None
@@ -173,7 +277,7 @@ def blast_presults():
     form3 = BlastButton_Form()
 
     #open raw data csv, create fasta file from it
-    df = pd.read_csv("Cif Database for Jesse.csv")
+    df = pd.read_csv("Cif_Database.csv")
     list_of_id = df['ID'].to_list()
     list_of_seq = df['aa_sequence'].to_list()
     ofile = open("db_entries.fasta", "w")
@@ -212,7 +316,7 @@ def blast_presults():
         temp = line.split()
         temp.remove('Query_1')
         #HARD CODED
-        temp[0] = '<a href=\"http://127.0.0.1:5000/gene/' + temp[0] + '\">' + temp[0] + '</a>'
+        temp[0] = '<a href=\"https://cif-database.herokuapp.com/' + temp[0] + '\">' + temp[0] + '</a>'
         blast_presults.append(temp)
    
     ofile.close()
@@ -222,7 +326,7 @@ def blast_presults():
 
     return render_template('blast_results.html', blast_presults=blast_presults,\
     seq=seq,limit=limit, form3=form3)
-
+"""
 ###########################################################################################################################
 @app.errorhandler(404)
 def page_not_found(e):
@@ -237,6 +341,7 @@ def internal_server_error(e):
 @app.route('/gene/<id>')
 def gene(id):
     entry = Data.query.filter_by(id=id).first_or_404()
+
     return render_template('gene.html', entry=entry)
 
 ###########################################################################################################################
