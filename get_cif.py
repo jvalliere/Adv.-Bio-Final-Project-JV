@@ -9,7 +9,6 @@ from datetime import date
 import pandas as pd
 import os
 from Bio.Blast.Applications import NcbiblastpCommandline
-from flask_heroku import Heroku
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thequickbrownfrog'
@@ -21,14 +20,16 @@ app.config['SECRET_KEY'] = 'thequickbrownfrog'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
 
 
-heroku = Heroku(app)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Soccer08@localhost/cifgene'
+
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 
 
 ###########################################################################################################################
-#class BlastButton_Form(FlaskForm):
-#    submit = SubmitField('Go to BLAST')
+class BlastButton_Form(FlaskForm):
+    submit = SubmitField('Go to BLAST')
 ###########################################################################################################################
 class SearchButton_Form(FlaskForm):
     submit = SubmitField('Go To Search')
@@ -36,8 +37,8 @@ class SearchButton_Form(FlaskForm):
 class BrowseButton_Form(FlaskForm):
     submit = SubmitField('Go To Browse')
 ###########################################################################################################################
-#class UploadButton_Form(FlaskForm):
-#    submit = SubmitField('Upload an Entry!')
+class UploadButton_Form(FlaskForm):
+    submit = SubmitField('Upload an Entry!')
 ###########################################################################################################################
 class SearchForm(FlaskForm):
     name2 = RadioField('Search by Wolbachia Strain, Arthropod Host, or entry ID:', choices=[('strain', 'Wolbachia Strain'), ('host', 'Arthropod Host'), ('id', 'Entry ID')])
@@ -48,10 +49,10 @@ class SearchForm(FlaskForm):
     submit = SubmitField('Submit')
 
 ###########################################################################################################################
-#class BLASTForm(FlaskForm):
-#    seq = StringField("Enter a sequence:", validators=[DataRequired()])
-#    limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
-#    submit = SubmitField('Submit')
+class BLASTForm(FlaskForm):
+    seq = StringField("Enter a sequence:", validators=[DataRequired()])
+    limit = SelectField('Limit results by:', choices=[('1', '1'), ('5', '5'), ('10', '10'), ('25', '25'), ('50', '50')])
+    submit = SubmitField('Submit')
 
 ###########################################################################################################################
 class BrowseForm(FlaskForm):
@@ -60,7 +61,7 @@ class BrowseForm(FlaskForm):
     submit = SubmitField('Submit')
 
 ###########################################################################################################################  
-"""class UploadForm(FlaskForm):
+class UploadForm(FlaskForm):
     u_gene = SelectField('Select Gene Type:', choices=[('cifA', 'CIF A'), ('cifB', 'CIF B')])
     u_cif_type = SelectField('Select CIF Type:', choices=[('Type I', 'Type I'), ('Type II', 'Type II'), ('Type III', 'Type III'), ('Type IV', 'Type IV'), ('Type V', 'Type V')])
     u_organism = StringField("Enter Organism:", validators=[DataRequired()])
@@ -71,7 +72,7 @@ class BrowseForm(FlaskForm):
     u_locus_tag = StringField("Enter Locus Tag:", validators=[DataRequired()])
     u_aa_sequence = StringField("Enter Amino Acid Sequence:", validators=[DataRequired()])
     submit = SubmitField('Submit')
-"""
+
 ###########################################################################################################################   
 class Data(db.Model):
     __tablename__ = "cifgene"
@@ -138,12 +139,12 @@ def index():
     elif request.method == 'POST':
         if request.form['action'] == 'Go to Search':
             return redirect('/search')
-        #elif request.form['action'] == 'Go to BLAST':
-        #    return redirect('/blast')
-        else:
+        elif request.form['action'] == 'Go to BLAST':
+            return redirect('/blast')
+        elif request.form['action'] == 'Go to Browse':
             return redirect('/browse')
-        #else:
-        #    return redirect('/upload')            
+        else:
+            return redirect('/upload')            
   
     return render_template("index.html")
 
@@ -163,7 +164,7 @@ def help():
     return render_template('help.html')
 
 ###########################################################################################################################
-"""@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
 
     u_gene = None
@@ -227,8 +228,7 @@ def upload_ty():
     today = date.today()
     c_date = today.strftime("%m/%d/%Y")
 
-    #changed
-    df = pd.read_excel('uploads.xlsx')    
+    df = pd.read_excel('C:/Users/Jesse/Adv_Bio/Local_Database/static/uploads.xlsx')    
 
     df1 = pd.DataFrame({'Date':[c_date],
     'ID':[''],
@@ -247,7 +247,7 @@ def upload_ty():
     df = df.append(df1)
 
     #changed
-    df.to_excel('uploads.xlsx', index=False)
+    df.to_excel('C:/Users/Jesse/Adv_Bio/Local_Database/static/uploads.xlsx', index=False)
 
     return render_template('upload_ty.html')
 
@@ -316,7 +316,7 @@ def blast_presults():
         temp = line.split()
         temp.remove('Query_1')
         #HARD CODED
-        temp[0] = '<a href=\"https://cif-database.herokuapp.com/' + temp[0] + '\">' + temp[0] + '</a>'
+        temp[0] = '<a href=\"http://127.0.0.1:5000/' + temp[0] + '\">' + temp[0] + '</a>'
         blast_presults.append(temp)
    
     ofile.close()
@@ -326,7 +326,7 @@ def blast_presults():
 
     return render_template('blast_results.html', blast_presults=blast_presults,\
     seq=seq,limit=limit, form3=form3)
-"""
+
 ###########################################################################################################################
 @app.errorhandler(404)
 def page_not_found(e):
