@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Home - CIF Gene Database{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <body>
+    <h1><strong>Welcome to The CIF Gene Database!</strong></h1>
+    <h3> Created in Spring 2022 by Jesse Valliere</h3>
+  </body>
+</div>
+<div class = "Welcome" style = "width:650px;float:left;">
+  <body>
+    <p>
+     Hello and welcome to the CIF Database! 
+     This is an interactive database created by Jesse Valliere for his Advanced Bioinformatics class.
+     The purpose of this database is to provide users available information on CIF gene entries.
+     This project was made possible by the collaboration with the Bordenstein Lab and the <i>Wolbachia</i> Project!   
+    </p> 
+    <a href = "https://wolbachiaprojectdb.org/"><img src="/static/Wolbachia Project.png", width=400, height=200, align="left" /></a>
+  </body>
+</div>
+<form id="package_form" action="" method="post">
+      <div class="panel-body"; style="float:right;clear: right;">
+          <input type ="submit" name="action" value="Go to Search">
+      </div>
+      <div class="panel-body"; style="float:right;clear: right;">
+          <input type ="submit" name="action" value="Go to Browse">
+      </div>
+      
+      
+      
+</form>
+
+{% endblock %}
+

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Search Results - CIF Gene Database{% endblock %}
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>....</title>
+  <meta charset="utf-8">
+<div class="page-header">
+  <body>
+    <h1>Search Results</h1>
+    <p>Here are the database hits based on the information you have entered!</p>
+</div>
+</head>
+<div class="container">
+Search parameters entered:
+<p>
+text = {{name1}}
+<p>
+strain/host = {{name2}}
+<p>
+limit results = {{name3}}
+<p>
+sort by = {{name4}}
+<p>
+
+<h2>List of Entries</h2>
+<div class="table-responsive">
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th>gene ID</th>
+        <th>Host</th>
+        <th>Wolbachia Strain</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+       {% for item in presults %}
+           <tr>
+             <td><a href="{{ url_for('gene', id=item.id) }}">{{item.id}}</a></td>
+             <td>{{item.host}}</td>
+             <td>{{item.strain}}</td>
+             <td>{{item.description}}</td>
+           </tr>
+        {% endfor %}
+   </tbody>
+  </table>
+</div>
+</div>
+</body>
+
+{{ wtf.quick_form(form3) }}
+{% endblock %}
+</html>

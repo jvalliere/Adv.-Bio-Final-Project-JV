@@ -1,0 +1,77 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}CIF Database{% endblock %}
+
+{% block navbar %}
+
+
+<style>
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: right;
+}
+
+li a {
+  display: block;
+  color: #90ee90;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #111;
+  color: white;
+}
+
+</style>
+</head>
+<body>
+
+<ul>
+    <div style="color:#90ee90;font-size:240%;float:left">The CIF Gene Database</div>
+    <li><a href="/ref">References</a></li>
+    <li><a href="/help">Help</a></li>
+    <li><a href="/browse">Browse</a></li>
+    <li><a href="/search">Search</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Home</a></li>
+</ul>
+
+</body>
+
+
+{% endblock %}
+
+{% block content1 %}
+<div class="container">
+    <div class="page-header">
+        <h1>The CIF gene Database</h1>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% block page_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<div class = "questions" style = "position:fixed;bottom:0;left:50%;margin-left:-125px;font-size:10px;">
+  <p>For any questions please email: 
+    <a href = "mailto: jvallier@ramapo.edu">jvallier@ramapo.edu</a>
+  </p>
+</div>
+
+{% endblock %}
+

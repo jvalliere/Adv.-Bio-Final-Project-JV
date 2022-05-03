@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{entry.id}} - CIF Gene Database{% endblock %}
+
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<div class="page-header">
+  <body>
+    <h1>{{entry.id}}</h1>
+    <p>Below is all the information for {{entry.id}}</p>
+</div>
+
+
+<div class="table-responsive">
+  <table class="table">
+    <thead class="thead-dark">
+	<caption>
+          <h3>{{entry.id}}</h3>
+     </caption>
+      <tr>
+      	<th>ID</th>
+        <th>Gene</th>
+        <th>Product</th>
+        <th>CIF Type</th>
+        <th>Organism</th>
+        <th>Strain</th>
+        <th>Host</th>
+        <th>Description</th>
+        <th>NCBI Nucleotide</th>
+        <th>Locus Tag</th>
+        <th>NCBI Protein</th>
+        <th style="width:70px">Sequence</th>
+      </tr>
+    </thead>
+    <tbody>
+
+           <tr>
+             <td>{{entry.id}}</td>
+             <td>{{entry.gene}}</td>
+             <td>{{entry.product}}</td>
+             <td>{{entry.cif_type}}</td>
+             <td>{{entry.organism}}</td>
+             <td>{{entry.strain}}</td>
+             <td>{{entry.host}}</td>
+             <td>{{entry.description}}</td>
+             <td>{{entry.ncbi_nucleotide}}</a>
+             <td>{{entry.locus_tag}}</td>
+             <td>{{entry.ncbi_protein}}</td>
+             <td style="word-wrap: break-word;min-width: 160px;max-width: 400px;">{{entry.aa_sequence}}</td>
+           </tr>
+   </tbody>
+  </table>
+</div>
+
+{% endblock %}

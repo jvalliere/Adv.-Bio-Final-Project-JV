@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Blast Results - CIF Gene Database{% endblock %}
+{% block page_content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>....</title>
+  <meta charset="utf-8">
+<div class="page-header">
+  <body>
+    <h1>BLAST Results</h1>
+    <p>Here are the database hits based on the information you have BLASTed!</p>
+  </body>
+</div>
+</head>
+
+
+
+<div class="container">
+  <body style="word-wrap: break-word;">
+    <p>Value of form variables:</p>
+    <p>sequence = {{seq}}</p>
+    <p>limit results = {{limit}}</p>
+  </body>
+</div>
+
+<div class="table-responsive">
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th>Gene ID</th>
+        <th>% Identity</th>
+        <th>Alignment Length</th>
+        <th>Mismatches</th>
+        <th>Gap Opens</th>
+        <th>Query Start</th>
+        <th>Query End</th>
+        <th>Sequence Start</th>
+        <th>Sequence End</th>
+        <th>E-value</th>
+        <th>Bit Score</th>
+      </tr>
+    </thead>
+    <tbody>
+       	{% for list in blast_presults %}
+       		<tr>
+       		{% for element in list %}
+           		<td>{{element|safe}}</td>
+       		{% endfor %}
+       		</tr>
+        {% endfor %}
+   </tbody>
+  </table>
+</div>
+
+{{ wtf.quick_form(form3) }}
+{% endblock %}
+</html>	
