@@ -4,10 +4,30 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Help for the CIF Gene Database</h1>
-    <p>This page will contain help for executing searches and analyzing results.</p>
-    <p>The data is searchable by Wolbachia Strain and Arthropod Host.  </p>
-    <p>The BLAST Tool is searchable by gene sequence</p>
+    <h1><strong>Help for the CIF Gene Database</strong></h1>
+    <p> </p>
+
+    <h2>Utilizing the Browse tool</h2>
+    <p>
+    	In order to utilize, click the "Browse" button on the top right menu. After the page loads, choose one of the parameters to browse by. 
+    	This would be by gene, like cifA or cifB, or by gene type, such as Type I - Type V. Then, select a number to limit the browse results by.
+	</p>
+	<h2>Utilizing the Search tool</h2>
+    <p>
+    	In order to utilize, click the "Search" button on the top right menu. After the page loads, choose one of the parameters to search by. 
+    	This would be by Wolbachia Strain, Arthropod Host, or by Gene ID. Then, enter an organism or ID into the text box. 
+    	Then select a number to limit the search results by, and also a parameter to limit your results by.
+	</p>
+	<h2>Utilizing the BLAST tool</h2>
+    <p>
+    	In order to utilize, click the "BLAST" Button on the top right menu. After the page loads, enter in a sequence you would like to BLAST against the database. Then, select a number to limit the results by. Keep in mind this tool follows the standard NCBI BlastP Command Line parameters, and uses an e-value of 0.001. 
+	</p>
+	<h2>Uploading an entry</h2>
+	<p><strong>Required information: gene, CIF type, organism, arthropod host, strain, locus tag, and sequence. Without these requirements an entry can not be submitted</strong></p> 
+    <p>
+    	In order to upload a sequence, click the "Upload an Entry!" box on the home page of the site. Following this, begin choosing the necessary parameters for Gene and the CIF type. Then, enter what organism the entry originates from, as well as the arthropod host and strain type. If the sequence has already been uploaded to NCBI, include the Nucleotide ID and Protein ID. Also enter in the locus tag, and lastly the sequence. If approved, the sequence will be included in the next Database installment! 
+    </p>      	 
+    
 </div>
 {% endblock %}
 ~                
