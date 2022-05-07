@@ -20,7 +20,7 @@ app.config['SECRET_KEY'] = 'thequickbrownfrog'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
 
 
-
+##PSQL sign on info
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Soccer08@localhost/cifgene'
 
 db = SQLAlchemy(app)
@@ -418,7 +418,6 @@ def search():
     name4 = None
     form = SearchForm()
 
-    print("IN THE SEARCH FUNCTION")
     if form.validate_on_submit():
         if request.method == 'POST':
            session['name1']  = form.name1.data      # name1 is search term entered in first text box on form
